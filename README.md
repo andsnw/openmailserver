@@ -69,6 +69,23 @@ For full install details, Linux/macOS notes, and troubleshooting, see
 - Reverse DNS / `PTR` is controlled by the provider that owns the server IP.
 - A fresh domain or IP may still land in spam until sender reputation improves.
 
+## VPS Provider Notes
+
+- Tested on `Binary Lane`. Outbound mail may require disabling port blocking in
+  mPanel first.
+- `OVHcloud VPS` is commonly used for self-hosted mail and generally exposes
+  port `25`, but may block spammy IPs at the network level.
+- `Hetzner Cloud` can work, but new cloud servers often need support approval
+  before outbound mail ports are opened.
+- `UpCloud` can open outbound port `25` on request after account verification.
+- `Exoscale` restricts SMTP by default and requires enabling access in the
+  provider portal.
+- `Akamai / Linode` may restrict outbound SMTP on newer accounts and can require
+  a support request.
+
+Provider policies change often. Before you deploy, verify outbound mail port
+access, reverse DNS support, and abuse-policy fit for your use case.
+
 ## Documentation
 
 - [`docs/README.md`](docs/README.md): docs index
