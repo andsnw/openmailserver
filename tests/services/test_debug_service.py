@@ -31,6 +31,9 @@ def test_doctor_and_config_reports_include_checks(monkeypatch, tmp_path):
         env="test",
         host="127.0.0.1",
         port=8787,
+        api_bind="8787",
+        mox_http_bind="80",
+        mox_https_bind="443",
         maildir_root=tmp_path / "maildir",
         attachment_root=tmp_path / "attachments",
         canonical_hostname="mail.example.test",
@@ -68,6 +71,9 @@ def test_doctor_and_config_reports_include_checks(monkeypatch, tmp_path):
     assert any(check["name"] == "mox_quickstart" for check in doctor["checks"])
     assert any(check["name"] == "port25" for check in doctor["checks"])
     assert doctor["dns_plan"] == [{"type": "MX"}]
+    assert config["api_bind"] == "8787"
+    assert config["mox_http_bind"] == "80"
+    assert config["mox_https_bind"] == "443"
     assert config["database_url"] == "***redacted***"
     assert config["admin_api_key"] == "***missing***"
     assert config["backup_encryption_key"] == "***configured***"
@@ -80,6 +86,9 @@ def test_doctor_report_warns_when_required_binaries_are_missing(monkeypatch, tmp
         env="test",
         host="127.0.0.1",
         port=8787,
+        api_bind="8787",
+        mox_http_bind="80",
+        mox_https_bind="443",
         maildir_root=tmp_path / "maildir",
         attachment_root=tmp_path / "attachments",
         canonical_hostname="mail.example.test",
@@ -119,6 +128,9 @@ def test_doctor_report_accepts_compose_backed_mox_runtime(monkeypatch, tmp_path)
         env="test",
         host="127.0.0.1",
         port=8787,
+        api_bind="8787",
+        mox_http_bind="80",
+        mox_https_bind="443",
         maildir_root=tmp_path / "maildir",
         attachment_root=tmp_path / "attachments",
         canonical_hostname="mail.example.test",

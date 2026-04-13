@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from typer.testing import CliRunner
 
 from openmailserver import cli
@@ -12,10 +14,33 @@ def test_install_command_writes_runtime():
     result = runner.invoke(app, ["install"])
     assert result.exit_code == 0
     assert "admin_api_key" in result.stdout
+    assert "published_ports" in result.stdout
     assert "runtime_files" in result.stdout
     assert "container-mox" in result.stdout
     assert "quickstart_command" in result.stdout
     assert "docker compose up -d" in result.stdout
+
+
+def test_install_command_writes_bind_overrides_in_env():
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            app,
+            [
+                "install",
+                "--api-bind",
+                "127.0.0.1:9787",
+                "--mox-http-bind",
+                "127.0.0.1:8080",
+                "--mox-https-bind",
+                "127.0.0.1:8443",
+            ],
+        )
+
+        assert result.exit_code == 0
+        env_text = Path(".env").read_text(encoding="utf-8")
+        assert "OPENMAILSERVER_API_BIND=127.0.0.1:9787" in env_text
+        assert "OPENMAILSERVER_MOX_HTTP_BIND=127.0.0.1:8080" in env_text
+        assert "OPENMAILSERVER_MOX_HTTPS_BIND=127.0.0.1:8443" in env_text
 
 
 def test_plan_dns_command_outputs_records():

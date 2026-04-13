@@ -55,6 +55,16 @@ curl http://127.0.0.1:8787/health
 .venv/bin/openmailserver plan-dns
 ```
 
+If another web server already owns public `80` and `443`, generate `.env` with
+loopback binds for the `mox` web listeners and proxy the mail hostname through
+your front-end server:
+
+```bash
+.venv/bin/openmailserver install \
+  --mox-http-bind 127.0.0.1:8080 \
+  --mox-https-bind 127.0.0.1:8443
+```
+
 Use a real domain from the start. Public internet delivery is not ready until
 `MX`, `SPF`, `DKIM`, `DMARC`, reverse DNS, and reachable mail ports are in place.
 
