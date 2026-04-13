@@ -70,6 +70,8 @@ docker compose up -d
 .venv/bin/openmailserver doctor
 ```
 
+## Custom Port Binds
+
 If another reverse proxy or web server already owns public `80` and `443` on the
 same host, generate the stack config with loopback-only binds for the `mox` web
 listeners and proxy the mail hostname to those loopback ports:
