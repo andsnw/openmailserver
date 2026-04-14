@@ -55,6 +55,13 @@ curl http://127.0.0.1:8787/health
 .venv/bin/openmailserver plan-dns
 ```
 
+## Custom Port Binds
+
+By default, the stack publishes the API and web interfaces on host ports
+`8787`, `80`, and `443`. To change those binds, see
+[the installation docs](docs/install.md#custom-port-binds) for the
+supported reverse-proxy deployment flow.
+
 Use a real domain from the start. Public internet delivery is not ready until
 `MX`, `SPF`, `DKIM`, `DMARC`, reverse DNS, and reachable mail ports are in place.
 

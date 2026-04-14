@@ -65,6 +65,9 @@ def _write_env(settings: Settings, admin_key: str, backup_key: str) -> Path:
     content = f"""OPENMAILSERVER_ENV=development
 OPENMAILSERVER_HOST={settings.host}
 OPENMAILSERVER_PORT={settings.port}
+OPENMAILSERVER_API_BIND={settings.api_bind}
+OPENMAILSERVER_MOX_HTTP_BIND={settings.mox_http_bind}
+OPENMAILSERVER_MOX_HTTPS_BIND={settings.mox_https_bind}
 OPENMAILSERVER_DATA_DIR={settings.data_dir}
 OPENMAILSERVER_LOG_DIR={settings.log_dir}
 OPENMAILSERVER_DATABASE_URL={settings.database_url}
@@ -105,6 +108,25 @@ OPENMAILSERVER_DEBUG_API_ENABLED={str(settings.debug_api_enabled).lower()}
     return path
 
 
+def _install_settings_with_overrides(
+    settings: Settings,
+    *,
+    api_bind: str | None = None,
+    mox_http_bind: str | None = None,
+    mox_https_bind: str | None = None,
+) -> Settings:
+    updates = {
+        key: value
+        for key, value in {
+            "api_bind": api_bind,
+            "mox_http_bind": mox_http_bind,
+            "mox_https_bind": mox_https_bind,
+        }.items()
+        if value is not None
+    }
+    return settings.model_copy(update=updates) if updates else settings
+
+
 def _bootstrap_admin_key() -> str:
     session = _session()
     key = generate_api_key(prefix="admin")
@@ -127,10 +149,18 @@ def preflight() -> None:
     typer.echo(json.dumps(report, indent=2))
 
 
-@app.command()
-def install() -> None:
-    """Generate local config, container runtime directories, and install metadata."""
-    settings = get_settings()
+def _run_install(
+    *,
+    api_bind: str | None = None,
+    mox_http_bind: str | None = None,
+    mox_https_bind: str | None = None,
+) -> None:
+    settings = _install_settings_with_overrides(
+        get_settings(),
+        api_bind=api_bind,
+        mox_http_bind=mox_http_bind,
+        mox_https_bind=mox_https_bind,
+    )
     settings.ensure_directories()
     create_all()
     admin_key = settings.admin_api_key or _bootstrap_admin_key()
@@ -143,6 +173,11 @@ def install() -> None:
                 "status": "ok",
                 "runtime": "container-mox",
                 "env_file": str(env_path),
+                "published_ports": {
+                    "api": settings.api_bind,
+                    "mox_http": settings.mox_http_bind,
+                    "mox_https": settings.mox_https_bind,
+                },
                 "runtime_files": runtime_files,
                 "quickstart_command": runtime_files["quickstart_command"],
                 "next_steps": [
@@ -155,6 +190,29 @@ def install() -> None:
             },
             indent=2,
         )
+    )
+
+
+@app.command()
+def install(
+    api_bind: str | None = typer.Option(
+        None,
+        help="Docker host bind for the API service, for example 8787 or 127.0.0.1:8787.",
+    ),
+    mox_http_bind: str | None = typer.Option(
+        None,
+        help="Docker host bind for mox HTTP, for example 80 or 127.0.0.1:8080.",
+    ),
+    mox_https_bind: str | None = typer.Option(
+        None,
+        help="Docker host bind for mox HTTPS, for example 443 or 127.0.0.1:8443.",
+    ),
+) -> None:
+    """Generate local config, container runtime directories, and install metadata."""
+    _run_install(
+        api_bind=api_bind,
+        mox_http_bind=mox_http_bind,
+        mox_https_bind=mox_https_bind,
     )
 
 
@@ -339,7 +397,7 @@ def restore(path: str) -> None:
 @app.command()
 def bootstrap() -> None:
     """Convenience wrapper for install -> doctor."""
-    install()
+    _run_install()
     doctor()
 
 

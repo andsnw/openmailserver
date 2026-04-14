@@ -70,6 +70,21 @@ docker compose up -d
 .venv/bin/openmailserver doctor
 ```
 
+## Custom Port Binds
+
+If another reverse proxy or web server already owns public `80` and `443` on the
+same host, generate the stack config with loopback-only binds for the `mox` web
+listeners and proxy the mail hostname to those loopback ports. If you also want
+the Open Mailserver API published on a different host-side port or only on
+loopback, add `--api-bind` too:
+
+```bash
+.venv/bin/openmailserver install \
+  --api-bind 127.0.0.1:9787 \
+  --mox-http-bind 127.0.0.1:8080 \
+  --mox-https-bind 127.0.0.1:8443
+```
+
 Review the generated `.env` and set `OPENMAILSERVER_PRIMARY_DOMAIN`,
 `OPENMAILSERVER_CANONICAL_HOSTNAME`, and related values for the real domain you
 intend to host.
@@ -194,10 +209,13 @@ Review `.env.example` and the generated `.env`.
 Most important values:
 
 - `OPENMAILSERVER_DATABASE_URL`
+- `OPENMAILSERVER_API_BIND`
 - `OPENMAILSERVER_SMTP_HOST`
 - `OPENMAILSERVER_CANONICAL_HOSTNAME`
 - `OPENMAILSERVER_PRIMARY_DOMAIN`
 - `OPENMAILSERVER_PUBLIC_IP`
+- `OPENMAILSERVER_MOX_HTTP_BIND`
+- `OPENMAILSERVER_MOX_HTTPS_BIND`
 - `OPENMAILSERVER_MOX_ADMIN_ACCOUNT`
 - `OPENMAILSERVER_MOX_ADMIN_ADDRESS`
 - `OPENMAILSERVER_ADMIN_API_KEY`

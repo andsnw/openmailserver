@@ -20,7 +20,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["uvicorn", "openmailserver.app:app", "--host", "0.0.0.0", "--port", "8787"]
+    command:
+      [
+        "uvicorn",
+        "openmailserver.app:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "${OPENMAILSERVER_PORT:-8787}",
+      ]
     env_file:
       - .env
     environment:
@@ -32,7 +40,7 @@ services:
       - ./logs:/app/logs
       - ./runtime:/app/runtime
     ports:
-      - "8787:8787"
+      - "${OPENMAILSERVER_API_BIND:-8787}:${OPENMAILSERVER_PORT:-8787}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,8 +74,8 @@ services:
       - "587:587"
       - "143:143"
       - "993:993"
-      - "80:80"
-      - "443:443"
+      - "${OPENMAILSERVER_MOX_HTTP_BIND:-80}:80"
+      - "${OPENMAILSERVER_MOX_HTTPS_BIND:-443}:443"
     healthcheck:
       test: ["CMD-SHELL", "test -f /mox/config/mox.conf"]
       interval: 5s

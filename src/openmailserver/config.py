@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     env: str = "development"
     host: str = "0.0.0.0"
     port: int = 8787
+    api_bind: str = "8787"
+    mox_http_bind: str = "80"
+    mox_https_bind: str = "443"
     data_dir: Path = Path("./data")
     log_dir: Path = Path("./logs")
     database_url: str = "postgresql+psycopg://openmailserver:openmailserver@postgres:5432/openmailserver"
